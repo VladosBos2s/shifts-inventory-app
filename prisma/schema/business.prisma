@@ -1,0 +1,35 @@
+model WashProgram {
+    id String @unique @default(cuid())
+    name String
+    price Int
+    foamUsage Int @map("foam_usage")
+    transactions Transaction[]  
+
+    @@map("wash_programs")  
+}
+
+model Transaction {
+  id            String      @id @default(uuid())
+  shiftId       String
+  programId     String
+  amount        Int         // Total price in base currency (e.g., cents)
+  paymentMethod String      @default("CASH") // CASH, CARD, BLIK
+  createdAt     DateTime    @default(now())
+
+  shift         Shift       @relation(fields: [shiftId], references: [id])
+  program       WashProgram @relation(fields: [programId], references: [id])
+
+  @@map("transactions")
+}
+
+model Inventory {
+    id String @id @default(cuid())
+    name String // Example: 'Active foam'
+    quantity Int // Current stock in ml
+    unit String @default("ml")
+    minStockLimit Int      @default(2000) // Alert threshold (e.g., 2 liters)
+    updatedAt     DateTime @updatedAt
+
+  @@map("inventories")
+
+}
