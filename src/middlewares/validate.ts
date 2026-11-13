@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { ZodError } from 'zod';
-import { AnyZodObject } from 'zod/v3';
-export const validate = (schema: AnyZodObject) => 
+import { z, ZodError } from 'zod';
+
+export const validate = (schema: z.ZodTypeAny) => 
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       await schema.parseAsync({
@@ -14,7 +14,7 @@ export const validate = (schema: AnyZodObject) =>
       if (error instanceof ZodError) {
         return res.status(400).json({
           error: 'Ошибка валидации данных',
-          details: error.errors.map(e => ({
+          details: error.issues.map(e => ({
             field: e.path.filter(p => p !== 'body').join('.'),
             message: e.message
           }))

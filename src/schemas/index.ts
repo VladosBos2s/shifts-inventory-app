@@ -14,7 +14,7 @@ export const createTransactionSchema = z.object({
     programId: z.string().min(1, 'ID программы обязателен'),
     inventoryId: z.string().optional(),
     paymentMethod: z.enum(['CASH', 'CARD'], {
-      errorMap: () => ({ message: 'Способ оплаты должен быть CASH или CARD' })
+      message: 'Способ оплаты должен быть CASH или CARD'
     })
   })
 });
