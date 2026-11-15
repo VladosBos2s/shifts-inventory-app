@@ -1,0 +1,29 @@
+model Box {
+  id       String  @id @default(uuid())
+  name     String
+  isActive Boolean @default(true)
+  
+  shifts   Shift[]
+
+  @@map("boxes")
+}
+
+model Shift {
+  id         String   @id @default(uuid())
+  userId     String
+  boxId      String
+  startTime  DateTime @default(now())
+  endTime    DateTime?
+  startCash  Int
+  expectedCash Int?
+  actualCash Int?
+  isClosed   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id])
+  box          Box           @relation(fields: [boxId], references: [id])
+  transactions Transaction[]
+
+  @@map("shifts")
+}
