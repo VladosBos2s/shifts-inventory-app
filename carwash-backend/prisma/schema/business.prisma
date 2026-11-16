@@ -1,11 +1,12 @@
 model WashProgram {
-    id String @unique @default(cuid())
-    name String
-    price Int
-    foamUsage Int @map("foam_usage")
-    transactions Transaction[]  
+  id           String              @id @default(cuid())
+  name         String
+  price        Int
+  foamUsage    Int                 @default(0) @map("foam_usage")
+  transactions Transaction[]
+  consumables  ProgramConsumable[]
 
-    @@map("wash_programs")  
+  @@map("wash_programs")
 }
 
 model Transaction {
@@ -29,7 +30,20 @@ model Inventory {
     unit String @default("ml")
     minStockLimit Int      @default(2000) // Alert threshold (e.g., 2 liters)
     updatedAt     DateTime @updatedAt
+    programs      ProgramConsumable[]
 
   @@map("inventories")
 
+}
+
+model ProgramConsumable {
+  id          String      @id @default(cuid())
+  programId   String
+  inventoryId String
+  quantity    Int         
+
+  program     WashProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  inventory   Inventory   @relation(fields: [inventoryId], references: [id])
+
+  @@map("program_consumables")
 }
