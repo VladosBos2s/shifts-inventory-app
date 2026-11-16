@@ -59,5 +59,20 @@ router.post('/', requireRole('ADMIN'), async (req, res, next) => {
     next(error);
   }
 });
+router.delete('/:id', requireRole('ADMIN'), async (req, res, next) => {
+  try {
+    const id = req.params.id as string;
+    await prisma.washProgram.delete({ where: { id } });
+    res.json({ message: 'Program deleted successfully' });
+  } catch (error: any) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Program not found' });
+    }
+    if (error.code === 'P2003') {
+      return res.status(400).json({ error: 'Cannot delete: program is linked to existing transactions' });
+    }
+    next(error);
+  }
+});
 
 export default router;
