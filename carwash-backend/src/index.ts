@@ -29,7 +29,7 @@ app.get('/health', (req, res) => {
 app.use('/auth', authRoute);
 
 // Secured routes (must have header Authorization: Bearer <token>)
-app.use('/boxes', authenticateToken, boxesRoute);
+app.use('/boxes', authenticateToken, requireRole('ADMIN'), boxesRoute);
 app.use('/users',  authenticateToken, requireRole('ADMIN'), usersRoute); // Юзерами управляет только админ
 app.use('/analytics', authenticateToken, requireRole('ADMIN'), analyticsRoute); 
 app.use('/shifts', authenticateToken, shiftsRoute);
