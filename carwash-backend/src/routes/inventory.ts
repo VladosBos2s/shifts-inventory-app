@@ -70,6 +70,12 @@ router.patch('/:id/restock', requireRole('ADMIN'), async (req, res, next) => {
 router.delete('/:id', requireRole('ADMIN'), async (req, res, next) => {
   try {
     const id = req.params.id as string;
+
+    const itemsCount = await prisma.inventory.count();
+      if (itemsCount <= 7) {
+  return res.status(403).json({ error: 'Default demo inventory items cannot be deleted.' });
+      }
+
     await prisma.inventory.delete({ where: { id } });
     res.json({ message: 'Inventory item deleted successfully' });
   } catch (error: any) {

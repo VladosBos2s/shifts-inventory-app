@@ -2,6 +2,13 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../lib/prisma'
 
+const PROTECTED_DEMO_EMAILS = [
+  'admin@washsaas.com',
+  'alex@washsaas.com',
+  'maria@washsaas.com',
+  'david@washsaas.com'
+];
+
 const router = Router();
 const PENDING_MARKER = 'PENDING_SETUP';
 
@@ -81,6 +88,16 @@ router.post('/', async (req, res, next) => {
 router.patch('/:id/reset-password', async (req, res, next) => {
   try {
     const id = req.params.id as string;
+
+    const targetUser = await prisma.user.findUnique({ where: { id: req.params.id } });
+if (!targetUser) {
+  return res.status(404).json({ error: 'User not found' });
+}
+
+if (PROTECTED_DEMO_EMAILS.includes(targetUser.email)) {
+  return res.status(403).json({ error: 'Demo accounts cannot be modified or deleted' });
+}
+
     await prisma.user.update({
       where: { id },
       data: { passwordHash: PENDING_MARKER }
@@ -101,6 +118,14 @@ router.delete('/:id', async (req: any, res, next) => {
     if (req.user?.userId === id) {
       return res.status(400).json({ error: 'You cannot delete your own active admin account' });
     }
+        const targetUser = await prisma.user.findUnique({ where: { id: req.params.id } });
+if (!targetUser) {
+  return res.status(404).json({ error: 'User not found' });
+}
+
+    if (PROTECTED_DEMO_EMAILS.includes(targetUser.email)) {
+  return res.status(403).json({ error: 'Demo accounts cannot be modified or deleted' });
+}
 
     await prisma.user.delete({ where: { id } });
     res.json({ message: 'User deleted successfully' });
@@ -108,6 +133,7 @@ router.delete('/:id', async (req: any, res, next) => {
     if (error.code === 'P2025') {
       return res.status(404).json({ error: 'User not found' });
     }
+
     if (error.code === 'P2003') {
       return res.status(400).json({
         error: 'Cannot delete user because they have recorded shifts in history'

@@ -62,6 +62,12 @@ router.post('/', requireRole('ADMIN'), async (req, res, next) => {
 router.delete('/:id', requireRole('ADMIN'), async (req, res, next) => {
   try {
     const id = req.params.id as string;
+
+    const programsCount = await prisma.washProgram.count();
+    if (programsCount <= 5) {
+      return res.status(403).json({ error: 'Default demo wash programs cannot be deleted.' });
+    }
+
     await prisma.washProgram.delete({ where: { id } });
     res.json({ message: 'Program deleted successfully' });
   } catch (error: any) {

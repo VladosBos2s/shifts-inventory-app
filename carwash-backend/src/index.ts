@@ -11,6 +11,7 @@ import authRoute from './routes/auth';
 import analyticsRoute from './routes/analytics'
 import { authenticateToken, requireRole } from './middlewares/auth';
 import { errorHandler } from './middlewares/handleError';
+import { seedDemoData } from './lib/seedDemo';
 
 
 const app = express();
@@ -37,7 +38,27 @@ app.use('/programs', authenticateToken, programsRoute);
 app.use('/inventory', authenticateToken, inventoryRoute);
 app.use('/transactions', authenticateToken, transactionsRoute);
 
-// 2. Глобальный обработчик ошибок (ОБЯЗАТЕЛЬНО ПОСЛЕ ВСЕХ РОУТОВ)
+app.post('/reset-demo', async (req, res) => {
+  const secret = process.env.DEMO_RESET_KEY || 'my-secret-reset-2026';
+  if (req.headers['x-reset-key'] !== secret) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  try {
+    await seedDemoData();
+    res.json({ message: 'Demo database reset successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to reset demo data' });
+  }
+});
+
+
+const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+setInterval(() => {
+  seedDemoData()
+    .then(() => console.log('🔄 Auto-reset demo database completed'))
+    .catch((err) => console.error('❌ Auto-reset failed:', err));
+}, TWENTY_FOUR_HOURS);
+
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;

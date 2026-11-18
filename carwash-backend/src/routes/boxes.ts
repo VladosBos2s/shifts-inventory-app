@@ -78,6 +78,12 @@ router.patch('/:id/toggle', requireRole('ADMIN'), async (req, res, next) => {
 router.delete('/:id', requireRole('ADMIN'), async (req, res, next) => {
   try {
     const id = req.params.id as string;
+
+    const boxesCount = await prisma.box.count();
+    if (boxesCount <= 4) {
+  return res.status(403).json({ error: 'Default demo boxes cannot be deleted. Create a new box to test deletion.' });
+  }
+
     await prisma.box.delete({ where: { id } });
     res.json({ message: 'Box deleted successfully' });
   } catch (error: any) {
