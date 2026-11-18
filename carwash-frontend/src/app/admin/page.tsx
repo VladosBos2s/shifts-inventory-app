@@ -16,7 +16,6 @@ export default function AdminDashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    // 1. check tokens and user role
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
 
@@ -30,17 +29,14 @@ export default function AdminDashboard() {
 
   const fetchAnalytics = async () => {
     try {
-      const res = await api.get('/analytics/revenue'); 
-      
+      const res = await api.get('/analytics/revenue');
+
       setAnalytics({
-        totalRevenue: res.data.allTime.total,     
-        cashRevenue: res.data.today.cash,         
-        cardRevenue: res.data.today.card,         
-        todayTotal: res.data.today.total,         
-        chartData: [
-          { name: 'Today', revenue: res.data.today.total },
-          { name: 'All Time', revenue: res.data.allTime.total },
-        ]
+        totalRevenue: res.data.allTime.total,
+        cashRevenue: res.data.allTime.cash,
+        cardRevenue: res.data.allTime.card,
+        todayTotal: res.data.today.total,
+        chartData: res.data.dailyChart || []
       });
     } catch (err) {
       console.error('Failed to load analytics', err);
@@ -48,8 +44,6 @@ export default function AdminDashboard() {
       setLoading(false);
     }
   };
-
-  const COLORS = ['#6366f1', '#10b981'];
 
   return (
     <div className="space-y-8">
@@ -71,7 +65,9 @@ export default function AdminDashboard() {
             <div className="bg-indigo-500/10 p-2.5 rounded-xl text-indigo-400"><DollarSign className="w-5 h-5" /></div>
           </div>
           <div className="text-3xl font-bold">${analytics?.totalRevenue || 0}</div>
-          <p className="text-emerald-400 text-xs mt-2 flex items-center gap-1">↑ +12.5% from last week</p>
+          <p className="text-emerald-400 text-xs mt-2 flex items-center gap-1">
+            Today: +${analytics?.todayTotal || 0}
+          </p>
         </div>
 
         <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl relative overflow-hidden">
@@ -85,19 +81,19 @@ export default function AdminDashboard() {
 
         <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl relative overflow-hidden">
           <div className="flex justify-between items-start mb-4">
-            <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Card Payments</span>
+            <span className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Card &amp; BLIK Payments</span>
             <div className="bg-blue-500/10 p-2.5 rounded-xl text-blue-400"><CreditCard className="w-5 h-5" /></div>
           </div>
           <div className="text-3xl font-bold">${analytics?.cardRevenue || 0}</div>
-          <p className="text-slate-400 text-xs mt-2">Terminal / Stripe payments</p>
+          <p className="text-slate-400 text-xs mt-2">Terminal / electronic payments</p>
         </div>
       </div>
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Bar Chart */}
+        {/* 7-Day Bar Chart */}
         <div className="lg:col-span-2 bg-slate-900 border border-slate-800 p-6 rounded-2xl">
-          <h3 className="text-base font-semibold mb-6">Weekly Revenue Performance ($)</h3>
+          <h3 className="text-base font-semibold mb-6">Last 7 Days Revenue Performance ($)</h3>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={analytics?.chartData || []}>
@@ -117,15 +113,15 @@ export default function AdminDashboard() {
         <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between">
           <div>
             <h3 className="text-base font-semibold mb-2">Payment Breakdown</h3>
-            <p className="text-slate-400 text-xs mb-4">Ratio between cash and electronic cards</p>
+            <p className="text-slate-400 text-xs mb-4">Ratio between cash and electronic payments</p>
           </div>
           <div className="h-48 flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={[
-                    { name: 'Card', value: analytics?.cardRevenue || 76 },
-                    { name: 'Cash', value: analytics?.cashRevenue || 24 },
+                    { name: 'Card / BLIK', value: analytics?.cardRevenue ?? 0 },
+                    { name: 'Cash', value: analytics?.cashRevenue ?? 0 },
                   ]}
                   innerRadius={60}
                   outerRadius={80}
@@ -140,7 +136,7 @@ export default function AdminDashboard() {
             </ResponsiveContainer>
           </div>
           <div className="flex justify-center gap-6 text-xs text-slate-400 mt-4">
-            <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-indigo-500"></span> Card</div>
+            <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-indigo-500"></span> Card / BLIK</div>
             <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-emerald-500"></span> Cash</div>
           </div>
         </div>
