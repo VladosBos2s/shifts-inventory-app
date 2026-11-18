@@ -8,6 +8,7 @@ const router = Router();
 router.post('/start', async (req, res) => {
   const { userId, boxId, startCash } = req.body;
 
+
   // 1. Check of existing Shift
   const existingShift = await prisma.shift.findFirst({
     where: {
