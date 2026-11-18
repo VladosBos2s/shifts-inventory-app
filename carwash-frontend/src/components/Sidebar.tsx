@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
-  LayoutDashboard, Box, Layers, Package, LogOut 
+  LayoutDashboard, Box, Layers, Package, LogOut, Users
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -13,6 +13,7 @@ export default function Sidebar() {
     { name: 'Boxes & Garages', href: '/admin/boxes', icon: Box },
     { name: 'Inventory & Stock', href: '/admin/inventory', icon: Package },
     { name: 'Wash Programs', href: '/admin/services', icon: Layers },
+    { name: 'Staff & Users', href: '/admin/users', icon: Users },
   ];
 
   return (
